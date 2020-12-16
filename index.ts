@@ -8,6 +8,11 @@ export interface Sink {
     Args: any
 }
 
+export interface TargetColumnForConcat {
+    TargetColumn: string
+    SourceColumns: string[]
+}
+
 export interface TaskInfo {
     SourceTable?: SourceTable[]
     PrimaryKeys?: string[]
@@ -16,6 +21,7 @@ export interface TaskInfo {
     OutPrimaryKeys?: string[]
     Sinks?: Sink[]
     OutputAggregation?: OutputAggr
+    TargetColumnsForConcat?: TargetColumnForConcat[]
 }
 
 export interface OutputAggr {
@@ -23,7 +29,6 @@ export interface OutputAggr {
     AggrType: "last",//目前只支持last
     OrderByColumn: string,
     Desc: boolean
-
 }
 
 export interface QueryClause {
@@ -32,12 +37,23 @@ export interface QueryClause {
     value: string
 }
 
+export interface QueryAggr {
+    column: string
+}
+
+export interface QueryOrder {
+    column: string
+    desc: boolean
+}
+
 export interface QueryArgs {
     cacheSize: number,
     dataSource: string,
     targetTable: string,
     targetColumns: string[],
-    query: QueryClause[]
+    query: QueryClause[],
+    aggr: QueryAggr[],
+    order: QueryOrder[],
 }
 
 export class Context {
@@ -51,15 +67,15 @@ export class Context {
         return this
     }
 
-    column(...names: string[]):Node {
+    column(...names: string[]): Node {
         return new ColumnNode(this, names.map(n => n.split(".").length == 3 ? n : this.defaultTable() + '.' + n))
     }
 
-    const(...expressions: string[]):Node {
+    const(...expressions: string[]): Node {
         return new ConstNode(this, expressions)
     }
 
-    concat(...nodes: Node[]):Node {
+    concat(...nodes: Node[]): Node {
         return new ConcatNode(this, nodes)
     }
 
@@ -98,6 +114,17 @@ export class Context {
     outPrimaryKeys(...pks: string[]) {
         this.taskInfo.OutPrimaryKeys = pks;
         return this
+    }
+
+    concatTargetColumns(targetColumn: string, ...sourceColumns: string[]) {
+        if (!this.taskInfo.TargetColumnsForConcat) {
+            this.taskInfo.TargetColumnsForConcat = [];
+        }
+
+        this.taskInfo.TargetColumnsForConcat.push({
+            TargetColumn: targetColumn,
+            SourceColumns: sourceColumns
+        })
     }
 
     dbSink(dataSource: string, schema: string, table: string, upsert = false, autoTruncate = false) {
@@ -212,7 +239,7 @@ class Node {
         return new FilterNode(this.ctx, this, expr)
     }
 
-       aggr(type: string, argsExprs: string[], groupByExpr: string, orderByExpr: string, desc: boolean) {
+    aggr(type: string, argsExprs: string[], groupByExpr: string, orderByExpr: string, desc: boolean) {
         return new AggrNode(this.ctx, this, type, argsExprs, groupByExpr, orderByExpr, desc)
     }
 
@@ -460,9 +487,9 @@ class AggrNode extends Node {
 
 export const defaultContext = new Context();
 export const name = (n: string) => defaultContext.name(n);
-export const column = (...col: string[]):Node => defaultContext.column(...col);
-export const Const = (...expr: string[]):Node  => defaultContext.const(...expr);
-export const concat = (...node: Node[]):Node  => defaultContext.concat(...node);
+export const column = (...col: string[]): Node => defaultContext.column(...col);
+export const Const = (...expr: string[]): Node => defaultContext.const(...expr);
+export const concat = (...node: Node[]): Node => defaultContext.concat(...node);
 export const dataSource = (ds: string) => defaultContext.dataSource(ds);
 export const sourceTable = (schema: string, table: string) => defaultContext.sourceTable(schema, table);
 export const primaryKeys = (...keys: string[]) => defaultContext.primaryKeys(...keys);
