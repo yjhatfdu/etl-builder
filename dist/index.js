@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.useOutPutAggregation = exports.dbSink = exports.outPrimaryKeys = exports.parallel = exports.fetchCount = exports.primaryKeys = exports.sourceTable = exports.dataSource = exports.concat = exports.Const = exports.column = exports.name = exports.defaultContext = exports.SummaryType = exports.Context = void 0;
 class Context {
     constructor() {
         this.counter = 0;
@@ -9,6 +10,7 @@ class Context {
     }
     name(name) {
         this.taskName = name;
+        return this;
     }
     column(...names) {
         return new ColumnNode(this, names.map(n => n.split(".").length == 3 ? n : this.defaultTable() + '.' + n));
@@ -49,6 +51,15 @@ class Context {
     outPrimaryKeys(...pks) {
         this.taskInfo.OutPrimaryKeys = pks;
         return this;
+    }
+    columnToRow(sourceColumns, targetColumn) {
+        if (!this.taskInfo.columnToRow) {
+            this.taskInfo.columnToRow = [];
+        }
+        this.taskInfo.columnToRow.push({
+            TargetColumn: targetColumn,
+            SourceColumns: sourceColumns
+        });
     }
     dbSink(dataSource, schema, table, upsert = false, autoTruncate = false) {
         if (this.taskInfo.Sinks == null) {

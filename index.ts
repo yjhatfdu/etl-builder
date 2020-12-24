@@ -8,7 +8,7 @@ export interface Sink {
     Args: any
 }
 
-export interface TargetColumnForConcat {
+export interface columnToRow {
     TargetColumn: string
     SourceColumns: string[]
 }
@@ -21,7 +21,7 @@ export interface TaskInfo {
     OutPrimaryKeys?: string[]
     Sinks?: Sink[]
     OutputAggregation?: OutputAggr
-    TargetColumnsForConcat?: TargetColumnForConcat[]
+    columnToRow?: columnToRow[]
 }
 
 export interface OutputAggr {
@@ -116,12 +116,12 @@ export class Context {
         return this
     }
 
-    concatTargetColumns(targetColumn: string, ...sourceColumns: string[]) {
-        if (!this.taskInfo.TargetColumnsForConcat) {
-            this.taskInfo.TargetColumnsForConcat = [];
+    columnToRow(sourceColumns: string[], targetColumn: string) {
+        if (!this.taskInfo.columnToRow) {
+            this.taskInfo.columnToRow = [];
         }
 
-        this.taskInfo.TargetColumnsForConcat.push({
+        this.taskInfo.columnToRow.push({
             TargetColumn: targetColumn,
             SourceColumns: sourceColumns
         })

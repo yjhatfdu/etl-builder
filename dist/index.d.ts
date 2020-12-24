@@ -6,6 +6,10 @@ export interface Sink {
     Type: string;
     Args: any;
 }
+export interface columnToRow {
+    TargetColumn: string;
+    SourceColumns: string[];
+}
 export interface TaskInfo {
     SourceTable?: SourceTable[];
     PrimaryKeys?: string[];
@@ -14,6 +18,7 @@ export interface TaskInfo {
     OutPrimaryKeys?: string[];
     Sinks?: Sink[];
     OutputAggregation?: OutputAggr;
+    columnToRow?: columnToRow[];
 }
 export interface OutputAggr {
     UseAggr: boolean;
@@ -26,28 +31,38 @@ export interface QueryClause {
     operator: "=" | ">" | "<" | "like" | ">=" | "<=";
     value: string;
 }
+export interface QueryAggr {
+    column: string;
+}
+export interface QueryOrder {
+    column: string;
+    desc: boolean;
+}
 export interface QueryArgs {
     cacheSize: number;
     dataSource: string;
     targetTable: string;
     targetColumns: string[];
     query: QueryClause[];
+    aggr: QueryAggr[];
+    order: QueryOrder[];
 }
 export declare class Context {
     counter: number;
     nodes: Node[];
     taskInfo: TaskInfo;
     taskName: string;
-    name(name: string): void;
-    column(...names: string[]): ColumnNode;
-    const(...expressions: string[]): ConstNode;
-    concat(...nodes: Node[]): ConcatNode;
+    name(name: string): this;
+    column(...names: string[]): Node;
+    const(...expressions: string[]): Node;
+    concat(...nodes: Node[]): Node;
     dataSource(ds: string): this;
     sourceTable(schema: string, table: string): this;
     primaryKeys(...keys: string[]): this;
     fetchCount(count: number): this;
     parallel(count: number): this;
     outPrimaryKeys(...pks: string[]): this;
+    columnToRow(sourceColumns: string[], targetColumn: string): void;
     dbSink(dataSource: string, schema: string, table: string, upsert?: boolean, autoTruncate?: boolean): this;
     empiSink(empiHost: string, worker: number, identifier: any): this;
     useOutPutAggregation(orderByColumn?: string, desc?: boolean, aggrType?: string): this;
@@ -105,41 +120,6 @@ declare class Node {
         HandlerArgs: any;
     };
 }
-declare class ColumnNode extends Node {
-    names: any;
-    constructor(ctx: Context, names: string[]);
-    build(sourceTransform?: any): {
-        Index: number;
-        NodeType: string;
-        Pre: number[];
-        Next: number[];
-        Context: any;
-        Line: number;
-        Column: number;
-        Id: string;
-        NodeArgs: any;
-        HandlerType: any;
-        HandlerArgs: any;
-    };
-}
-declare class ConstNode extends Node {
-    expressions: any;
-    query: QueryArgs;
-    constructor(ctx: Context, expressions: string[]);
-    build(sourceTransform?: any): {
-        Index: number;
-        NodeType: string;
-        Pre: number[];
-        Next: number[];
-        Context: any;
-        Line: number;
-        Column: number;
-        Id: string;
-        NodeArgs: any;
-        HandlerType: any;
-        HandlerArgs: any;
-    };
-}
 declare class MapNode extends Node {
     expressions: string[];
     query: QueryArgs;
@@ -178,23 +158,6 @@ declare class FieldNode extends Node {
 declare class SelectNode extends Node {
     fieldIndex: any[];
     constructor(ctx: Context, lastNode: Node, fields: number[]);
-    build(sourceTransform?: any): {
-        Index: number;
-        NodeType: string;
-        Pre: number[];
-        Next: number[];
-        Context: any;
-        Line: number;
-        Column: number;
-        Id: string;
-        NodeArgs: any;
-        HandlerType: any;
-        HandlerArgs: any;
-    };
-}
-declare class ConcatNode extends Node {
-    parentNodes: any;
-    constructor(ctx: Context, parentNodes: Node[]);
     build(sourceTransform?: any): {
         Index: number;
         NodeType: string;
@@ -274,10 +237,10 @@ declare class AggrNode extends Node {
     };
 }
 export declare const defaultContext: Context;
-export declare const name: (n: string) => void;
-export declare const column: (...col: string[]) => ColumnNode;
-export declare const Const: (...expr: string[]) => ConstNode;
-export declare const concat: (...node: Node[]) => ConcatNode;
+export declare const name: (n: string) => Context;
+export declare const column: (...col: string[]) => Node;
+export declare const Const: (...expr: string[]) => Node;
+export declare const concat: (...node: Node[]) => Node;
 export declare const dataSource: (ds: string) => Context;
 export declare const sourceTable: (schema: string, table: string) => Context;
 export declare const primaryKeys: (...keys: string[]) => Context;
