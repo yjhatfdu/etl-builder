@@ -13,6 +13,14 @@ export interface columnToRow {
     SourceColumns: string[]
 }
 
+export interface rowToColumn {
+    BaseColumn: string
+    MathColumn: string
+    MathValue: string
+    ExtractColumn: string
+    LoadColumn: string
+}
+
 export interface TaskInfo {
     SourceTable?: SourceTable[]
     PrimaryKeys?: string[]
@@ -22,6 +30,7 @@ export interface TaskInfo {
     Sinks?: Sink[]
     OutputAggregation?: OutputAggr
     columnToRow?: columnToRow[]
+    rowToColumn?: rowToColumn[]
 }
 
 export interface OutputAggr {
@@ -125,7 +134,25 @@ export class Context {
             TargetColumn: targetColumn,
             SourceColumns: sourceColumns
         })
+
+        return this
     }
+
+    rowToColumn(baseColumn: string,mathColumn: string,mathValue: string,extractColumn: string,loadColumn: string ){
+        if (!this.taskInfo.rowToColumn) {
+            this.taskInfo.rowToColumn = [];
+        }
+
+        this.taskInfo.rowToColumn.push({
+            BaseColumn: baseColumn,
+            MathColumn: mathColumn,
+            MathValue: mathValue,
+            ExtractColumn: extractColumn,
+            LoadColumn: loadColumn
+        })
+
+        return this
+    }    
 
     dbSink(dataSource: string, schema: string, table: string, upsert = false, autoTruncate = false) {
         if (this.taskInfo.Sinks == null) {
