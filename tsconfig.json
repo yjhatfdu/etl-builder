@@ -3,9 +3,9 @@
     "module": "commonjs",
     "target": "esnext",
     "sourceMap": true,
-    "lib": [],
+    "lib": ["esnext"],
     "declaration": true,
-    "outDir": "dist",
+    "outDir": "dist"
   },
   "exclude": [
     "node_modules"

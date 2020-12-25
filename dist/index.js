@@ -9,6 +9,7 @@ class Context {
     }
     name(name) {
         this.taskName = name;
+        return this;
     }
     column(...names) {
         return new ColumnNode(this, names.map(n => n.split(".").length == 3 ? n : this.defaultTable() + '.' + n));
@@ -49,6 +50,15 @@ class Context {
     outPrimaryKeys(...pks) {
         this.taskInfo.OutPrimaryKeys = pks;
         return this;
+    }
+    concatTargetColumns(targetColumn, ...sourceColumns) {
+        if (!this.taskInfo.TargetColumnsForConcat) {
+            this.taskInfo.TargetColumnsForConcat = [];
+        }
+        this.taskInfo.TargetColumnsForConcat.push({
+            TargetColumn: targetColumn,
+            SourceColumns: sourceColumns
+        });
     }
     dbSink(dataSource, schema, table, upsert = false, autoTruncate = false) {
         if (this.taskInfo.Sinks == null) {
