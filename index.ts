@@ -70,9 +70,22 @@ export class Context {
     nodes: Node[] = [];
     taskInfo: TaskInfo = {};
     taskName = "";
+    taskGroup = 0;
+    Priority = 0;
+    GroupID = 0;
 
     name(name: string) {
         this.taskName = name;
+        return this
+    }
+
+    taskgroup(id: number) {
+        this.GroupID = 0;
+        return this
+    }
+
+    priority(id: number) {
+        this.Priority = 0;
         return this
     }
 
@@ -202,7 +215,7 @@ export class Context {
 
     build(sourceTransform?) {
         let nodes = this.nodes.map(n => n.build(sourceTransform));
-        return {Graph: nodes.filter(x => !!x), Info: this.taskInfo, Name: this.taskName}
+        return {Graph: nodes.filter(x => !!x), Info: this.taskInfo, Name: this.taskName, Priority: this.Priority, GroupID: this.GroupID}
     }
 
     defaultTable() {
