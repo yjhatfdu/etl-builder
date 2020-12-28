@@ -80,12 +80,12 @@ export class Context {
     }
 
     taskgroup(id: number) {
-        this.GroupID = 0;
+        this.GroupID = id;
         return this
     }
 
     priority(id: number) {
-        this.Priority = 0;
+        this.Priority = id;
         return this
     }
 
