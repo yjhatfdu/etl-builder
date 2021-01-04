@@ -206,26 +206,30 @@ export class Context {
 
     build(sourceTransform?) {
         let nodes = this.nodes.map(n => n.build(sourceTransform));
-        return {
-            Layers: [
-                {
-                    Type:"Graph",
-                    Graph: nodes.filter(x => !!x), 
-                },
-                this._columnToRow ? {
-                    Type:"ColumnToRow",
-                    ColumnToRow: this._columnToRow
-                } : null,
-                this._rowToColumn ? {
-                    Type:"RowToColumn",
-                    RowToColumn: this._rowToColumn
-                } : null
-            ],
+        const ret = {
+            Layers: [],
             Info: this.taskInfo, 
             Name: this.taskName, 
             Priority: this.Priority, 
             GroupID: this.GroupID
-        }
+        };
+
+        ret.Layers.push({
+            Type:"Graph",
+            Graph: nodes.filter(x => !!x), 
+        });
+
+        this._columnToRow ? ret.Layers.push({
+            Type:"ColumnToRow",
+            ColumnToRow: this._columnToRow,
+        }) : null;
+
+        this._rowToColumn ? ret.Layers.push({
+            Type:"RowToColumn",
+            RowToColumn: this._rowToColumn
+        }) : null;
+        
+        return ret
     }
 
     defaultTable() {
