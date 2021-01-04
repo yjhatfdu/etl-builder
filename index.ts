@@ -9,28 +9,26 @@ export interface Sink {
 }
 
 export interface columnToRow {
-    TargetColumn: string
-    SourceColumns: string[]
+    TargetColumn?: string
+    SourceColumns?: string[]
 }
 
 export interface rowToColumn {
-    BaseColumn: string
-    MathColumn: string
-    MathValue: string
-    ExtractColumn: string
-    LoadColumn: string
+    BaseColumn?: string
+    MathColumn?: string
+    MathValue?: string
+    ExtractColumn?: string
+    LoadColumn?: string
 }
 
 export interface TaskInfo {
-    SourceTable?: SourceTable[]
+    SourceTable?: SourceTable
     PrimaryKeys?: string[]
     FetchCount?: number
     Workers?: number
-    OutPrimaryKeys?: string[]
+    DeduplicateKeys?: string[]
     Sinks?: Sink[]
     OutputAggregation?: OutputAggr
-    columnToRow?: columnToRow[]
-    rowToColumn?: rowToColumn[]
 }
 
 export interface OutputAggr {
@@ -74,6 +72,10 @@ export class Context {
     Priority = 0;
     GroupID = 0;
 
+    _columnToRow: columnToRow = null;
+    _rowToColumn: rowToColumn = null;
+
+
     name(name: string) {
         this.taskName = name;
         return this
@@ -89,8 +91,8 @@ export class Context {
         return this
     }
 
-    column(...names: string[]): Node {
-        return new ColumnNode(this, names.map(n => n.split(".").length == 3 ? n : this.defaultTable() + '.' + n))
+    column(name: string): Node {
+        return new ColumnNode(this, name.split(".").length == 3 ? name : this.defaultTable() + '.' + name)
     }
 
     const(...expressions: string[]): Node {
@@ -108,13 +110,10 @@ export class Context {
 
     //todo join option
     sourceTable(schema: string, table: string,) {
-        if (this.taskInfo.SourceTable == null) {
-            this.taskInfo.SourceTable = []
-        }
-        this.taskInfo.SourceTable.push({
+        this.taskInfo.SourceTable = {
             "Schema": schema,
             "Table": table
-        });
+        };
         return this
     }
 
@@ -133,36 +132,28 @@ export class Context {
         return this
     }
 
-    outPrimaryKeys(...pks: string[]) {
-        this.taskInfo.OutPrimaryKeys = pks;
+    deduplicateKeys(...pks: string[]) {
+        this.taskInfo.DeduplicateKeys = pks;
         return this
     }
 
     columnToRow(sourceColumns: string[], targetColumn: string) {
-        if (!this.taskInfo.columnToRow) {
-            this.taskInfo.columnToRow = [];
-        }
-
-        this.taskInfo.columnToRow.push({
+        this._columnToRow = {
             TargetColumn: targetColumn,
             SourceColumns: sourceColumns
-        })
+        }
 
         return this
     }
 
     rowToColumn(baseColumn: string,mathColumn: string,mathValue: string,extractColumn: string,loadColumn: string ){
-        if (!this.taskInfo.rowToColumn) {
-            this.taskInfo.rowToColumn = [];
-        }
-
-        this.taskInfo.rowToColumn.push({
+        this._rowToColumn = {
             BaseColumn: baseColumn,
             MathColumn: mathColumn,
             MathValue: mathValue,
             ExtractColumn: extractColumn,
             LoadColumn: loadColumn
-        })
+        }
 
         return this
     }    
@@ -215,7 +206,26 @@ export class Context {
 
     build(sourceTransform?) {
         let nodes = this.nodes.map(n => n.build(sourceTransform));
-        return {Graph: nodes.filter(x => !!x), Info: this.taskInfo, Name: this.taskName, Priority: this.Priority, GroupID: this.GroupID}
+        return {
+            Layers: [
+                {
+                    Type:"Graph",
+                    Graph: nodes.filter(x => !!x), 
+                },
+                this._columnToRow ? {
+                    Type:"ColumnToRow",
+                    ColumnToRow: this._columnToRow
+                } : null,
+                this._rowToColumn ? {
+                    Type:"RowToColumn",
+                    RowToColumn: this._rowToColumn
+                } : null
+            ],
+            Info: this.taskInfo, 
+            Name: this.taskName, 
+            Priority: this.Priority, 
+            GroupID: this.GroupID
+        }
     }
 
     defaultTable() {
@@ -321,7 +331,7 @@ class Node {
 class ColumnNode extends Node {
     names;
 
-    constructor(ctx: Context, names: string[]) {
+    constructor(ctx: Context, names: string) {
         super(ctx, 'column', null);
         this.names = names.slice();
         this.fields = names.slice();
@@ -329,7 +339,7 @@ class ColumnNode extends Node {
 
     build(sourceTransform?) {
         let n = super.build(sourceTransform);
-        n.NodeArgs = JSON.stringify(this.names);
+        n.NodeArgs = this.names;
         return n
     }
 }
@@ -527,7 +537,7 @@ class AggrNode extends Node {
 
 export const defaultContext = new Context();
 export const name = (n: string) => defaultContext.name(n);
-export const column = (...col: string[]): Node => defaultContext.column(...col);
+export const column = (col: string): Node => defaultContext.column(col);
 export const Const = (...expr: string[]): Node => defaultContext.const(...expr);
 export const concat = (...node: Node[]): Node => defaultContext.concat(...node);
 export const dataSource = (ds: string) => defaultContext.dataSource(ds);
@@ -535,7 +545,7 @@ export const sourceTable = (schema: string, table: string) => defaultContext.sou
 export const primaryKeys = (...keys: string[]) => defaultContext.primaryKeys(...keys);
 export const fetchCount = (count: number) => defaultContext.fetchCount(count);
 export const parallel = (count: number) => defaultContext.parallel(count);
-export const outPrimaryKeys = (...pks: string[]) => defaultContext.outPrimaryKeys(...pks);
+export const deduplicateKeys = (...pks: string[]) => defaultContext.deduplicateKeys(...pks);
 export const dbSink = (dataSource: string, schema: string, table: string, upsert = false, autoTruncate = false) =>
     defaultContext.dbSink(dataSource, schema, table, upsert, autoTruncate);
 export const useOutPutAggregation = (orderByColumn = "", desc = false, aggrType = "last") => useOutPutAggregation(orderByColumn, desc, aggrType);
