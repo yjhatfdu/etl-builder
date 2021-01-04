@@ -229,7 +229,7 @@ export class Context {
     }
 
     defaultTable() {
-        return this.taskInfo.SourceTable[0].Schema + '.' + this.taskInfo.SourceTable[0].Table
+        return this.taskInfo.SourceTable.Schema + '.' + this.taskInfo.SourceTable.Table
     }
 }
 
