@@ -92,7 +92,7 @@ export class Context {
     }
 
     column(name: string): Node {
-        return new ColumnNode(this, name.split(".").length == 3 ? name : this.defaultTable() + '.' + name)
+        return new ColumnNode(this, name)
     }
 
     const(...expressions: string[]): Node {
