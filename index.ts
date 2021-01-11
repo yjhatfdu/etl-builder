@@ -13,12 +13,16 @@ export interface columnToRow {
     SourceColumns?: string[]
 }
 
+export interface rowToColumnOne {
+    MathValue?: string
+    SourceColumn?: string
+    TargetColumn?: string
+}
+
 export interface rowToColumn {
     BaseColumn?: string
     MathColumn?: string
-    MathValue?: string
-    ExtractColumn?: string
-    LoadColumn?: string
+    Transform?: rowToColumnOne[]
 }
 
 export interface TaskInfo {
@@ -146,13 +150,11 @@ export class Context {
         return this
     }
 
-    rowToColumn(baseColumn: string,mathColumn: string,mathValue: string,extractColumn: string,loadColumn: string ){
+    rowToColumn(baseColumn: string,mathColumn: string,transform: rowToColumnOne[] ){
         this._rowToColumn = {
             BaseColumn: baseColumn,
             MathColumn: mathColumn,
-            MathValue: mathValue,
-            ExtractColumn: extractColumn,
-            LoadColumn: loadColumn
+            Transform: transform,
         }
 
         return this
@@ -230,10 +232,6 @@ export class Context {
         }) : null;
         
         return ret
-    }
-
-    defaultTable() {
-        return this.taskInfo.SourceTable.Schema + '.' + this.taskInfo.SourceTable.Table
     }
 }
 
