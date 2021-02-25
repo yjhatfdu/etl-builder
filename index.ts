@@ -178,6 +178,14 @@ export class Context {
         });
         return this
     }
+    
+    jsonSink(){
+        this.taskInfo.Sinks.push({
+            Args: null,
+            Type: "json"
+        })
+        return this
+    }
 
     empiSink(empiHost: string, worker: number, identifier: any) {
         if (this.taskInfo.Sinks == null) {
