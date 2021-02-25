@@ -33,6 +33,8 @@ export interface TaskInfo {
     DeduplicateKeys?: string[]
     Sinks?: Sink[]
     OutputAggregation?: OutputAggr
+    Init?: boolean,
+    CDC?: boolean
 }
 
 export interface OutputAggr {
@@ -232,6 +234,16 @@ export class Context {
         }) : null;
         
         return ret
+    }
+
+    Init() {
+        this.taskInfo.Init = true
+        return this
+    }
+
+    CDC() {
+        this.taskInfo.CDC = true
+        return this
     }
 }
 
