@@ -101,7 +101,7 @@ export class Context {
         return new ColumnNode(this, name)
     }
 
-    const(...expressions: string[]): Node {
+    const(...expressions: string[] | number[]): Node {
         return new ConstNode(this, expressions)
     }
 
@@ -370,7 +370,7 @@ class ConstNode extends Node {
     expressions;
     query: QueryArgs;
 
-    constructor(ctx: Context, expressions: string[]) {
+    constructor(ctx: Context, expressions: string[] | number[]) {
         super(ctx, 'const', null);
         this.expressions = expressions;
     }
