@@ -78,7 +78,7 @@ export class Context {
     Priority = 0;
     GroupID = 0;
 
-    _columnToRow: columnToRow = null;
+    _columnToRow: columnToRow[] = [];
     _rowToColumn: rowToColumn = null;
 
 
@@ -144,10 +144,10 @@ export class Context {
     }
 
     columnToRow(sourceColumns: string[], targetColumn: string) {
-        this._columnToRow = {
+        this._columnToRow.push({
             TargetColumn: targetColumn,
             SourceColumns: sourceColumns
-        }
+        })
 
         return this
     }
