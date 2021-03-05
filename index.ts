@@ -231,7 +231,7 @@ export class Context {
             Graph: nodes.filter(x => !!x), 
         });
 
-        this._columnToRow ? ret.Layers.push({
+        this._columnToRow.length ? ret.Layers.push({
             Type:"ColumnToRow",
             ColumnToRow: this._columnToRow,
         }) : null;
