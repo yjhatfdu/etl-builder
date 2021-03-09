@@ -255,7 +255,7 @@ export class Context {
     }
 }
 
-class Node {
+export class Node {
     prev: Node[];
     next: Node[];
     ctx: Context;
@@ -558,18 +558,3 @@ class AggrNode extends Node {
 
 
 export const defaultContext = new Context();
-// export const name = (n: string) => defaultContext.name(n);
-// export const column = (col: string): Node => defaultContext.column(col);
-// export const Const = (...expr: string[]): Node => defaultContext.const(...expr);
-// export const concat = (...node: Node[]): Node => defaultContext.concat(...node);
-// export const dataSource = (ds: string) => defaultContext.dataSource(ds);
-// export const sourceTable = (schema: string, table: string) => defaultContext.sourceTable(schema, table);
-// export const primaryKeys = (...keys: string[]) => defaultContext.primaryKeys(...keys);
-// export const fetchCount = (count: number) => defaultContext.fetchCount(count);
-// export const parallel = (count: number) => defaultContext.parallel(count);
-// export const deduplicateKeys = (...pks: string[]) => defaultContext.deduplicateKeys(...pks);
-// export const dbSink = (dataSource: string, schema: string, table: string, upsert = false, autoTruncate = false) =>
-//     defaultContext.dbSink(dataSource, schema, table, upsert, autoTruncate);
-// export const useOutPutAggregation = (orderByColumn = "", desc = false, aggrType = "last") => useOutPutAggregation(orderByColumn, desc, aggrType);
-export const node = Node;
-
