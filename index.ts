@@ -47,7 +47,7 @@ export interface OutputAggr {
 export interface QueryClause {
     column: string
     operator: "=" | ">" | "<" | "like" | ">=" | "<="
-    value: string
+    value: string | Number
 }
 
 export interface QueryAggr {
